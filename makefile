@@ -17,7 +17,6 @@ help:
 	@echo "  make f=Lecture1/memory_bug.c"
 	@echo "  make f=main.cpp"
 
-# 编译并运行
 all:
 	@if [ -z "$(f)" ]; then \
 		echo "Error: Please specify a file with f=<filename>"; \
@@ -28,15 +27,11 @@ all:
 	@EXT=$${f##*.}; \
 	if [ "$$EXT" = "c" ]; then \
 		BASENAME=$$(basename "$(f)" .c); \
-		echo "Compiling $(f) to $(BUILD_DIR)/$$BASENAME..."; \
 		$(CC) $(CFLAGS) "$(f)" -o "$(BUILD_DIR)/$$BASENAME" && \
-		echo "Running $(BUILD_DIR)/$$BASENAME..." && \
 		"$(BUILD_DIR)/$$BASENAME"; \
 	elif [ "$$EXT" = "cpp" ]; then \
 		BASENAME=$$(basename "$(f)" .cpp); \
-		echo "Compiling $(f) to $(BUILD_DIR)/$$BASENAME..."; \
 		$(CXX) $(CXXFLAGS) "$(f)" -o "$(BUILD_DIR)/$$BASENAME" && \
-		echo "Running $(BUILD_DIR)/$$BASENAME..." && \
 		"$(BUILD_DIR)/$$BASENAME"; \
 	else \
 		echo "Error: Unsupported file extension: $$EXT"; \

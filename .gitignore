@@ -80,3 +80,8 @@ build
 # ignore pdf slides and lab handouts
 slides
 src/Labs/datalab/datalab.pdf
+
+# ignore binary files of several labs
+src/Labs/datalab/btest
+src/Labs/datalab/fshow
+src/Labs/datalab/ishow

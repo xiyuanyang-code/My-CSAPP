@@ -141,14 +141,29 @@ NOTES:
  *   Max ops: 14
  *   Rating: 1
  */
-int bitXor(int x, int y) { return 2; }
+int bitXor(int x, int y) {
+  // $$x \oplus y = (x \lor y) \land \neg(x \land y)$$
+  int x_and_y = x & y;
+  int reverse_x_and_y = ~x_and_y;
+  int reverse_x = ~x;
+  int reverse_y = ~y;
+  int reverse_x_or_y = reverse_x & reverse_y;
+  int x_or_y = ~reverse_x_or_y;
+  int ans = x_or_y & reverse_x_and_y;
+  return ans;
+}
+
 /*
  * tmin - return minimum two's complement integer
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 4
  *   Rating: 1
  */
-int tmin(void) { return 2; }
+int tmin(void) {
+  int zero = ~0;
+  int ans = zero << 31;
+  return ans;
+}
 // 2
 /*
  * isTmax - returns 1 if x is the maximum, two's complement number,
@@ -157,7 +172,16 @@ int tmin(void) { return 2; }
  *   Max ops: 10
  *   Rating: 1
  */
-int isTmax(int x) { return 2; }
+int isTmax(int x) {
+  int t_min = x + 1;
+  int check_all_ones = t_min ^ x;
+  int should_be_zero = ~check_all_ones;
+
+  // * for every number which is not zero, !!x will be 1
+  // ! 注意区分清楚 ! 是逻辑运算符 而不是位运算的运算符
+  int should_be_one = !!t_min;
+  return (!should_be_zero) & should_be_one;
+}
 /*
  * allOddBits - return 1 if all odd-numbered bits in word set to 1
  *   where bits are numbered from 0 (least significant) to 31 (most significant)

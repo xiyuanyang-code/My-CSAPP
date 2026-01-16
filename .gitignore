@@ -76,3 +76,7 @@ Temporary Items
 build
 .vscode
 .claude
+
+# ignore pdf slides and lab handouts
+slides
+src/Labs/datalab/datalab.pdf

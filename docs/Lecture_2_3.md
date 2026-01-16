@@ -218,3 +218,87 @@ Zero (0):                0 (0x0000) (Binary: 0000000000000000)
 
 可以看到，同样都是 1111111111111111 的二进制表示（16 个 bits），对于不同的类型声明（比如 unsigned short 和 short），其解析的方式和最终的结果大相径庭。
 
+### Casting Surprises
+
+If there is a mix of unsigned and signed in single expression, **signed values with implicitly cast to unsigned**, this includes comparison operations: `<`, `>`, etc.
+
+While doing casting, the bit pattern remains **maintained**, but reinterpreted.（系统的类型转换，无论是强制的还是非强制的，都不会改变系统内存中的 0/1 状态）
+
+#### `abs(INT_MIN)`
+
+由于有符号数使用补码表示，负数范围比正数范围多一个。对于 64 位的系统，int 的最大整数是2147483647，最小整数是 -2147483648。这意味着 $-2147483648$ 没有对应的正数可以表示在 `int` 类型中。因此，总可以找到一个最小的负值，使其成为正数的时候会发生溢出现象。
+
+```c
+void abs_corner_case(int number = 0) {
+  int int_max = INT_MAX;
+  int int_min = INT_MIN;
+  printf("The maximum value of int is %d\n", int_max);
+  printf("The minimum value of int is %d\n", int_min);
+  printf("The abs of given number %d is %d\n", number, std::abs(number));
+  // The abs of given number -2147483648 is -2147483648
+  printf("%u\n", ((UINT_MAX << 1) + 1));
+  assert((UINT_MAX << 1) + 1 == UINT_MAX);
+}
+```
+
+#### Dangerous unsigned integers
+
+```c
+void dangerous_operations() {
+  unsigned i = 5;
+  for (; i >= 0; i--) {
+    printf("Entering the Loops");
+  }
+}
+```
+
+### Expanding and Truncating
+
+Given the $w$-bit signed integer $x$, we need to convert is into $w + k$-bit integer with the same value. (Like casting from `int` to `long long`)
+
+The rule is making copies bit-wise, and fill with $k$ copies of sign bit $x_{w-1}$.
+
+$$
+X' = x_{w-1}, \dots,x_{w-1}, x_{w-1}, x_{w-2}, \dots, x_0
+$$
+
+```c
+void sign_extensions() {
+  int a = 5e8;
+  SHOW_BINARY(a);
+  printf("\n");
+  printf("The size of b is %lu\n", sizeof(a));
+
+  long long b = (long long)a;
+  SHOW_BINARY(b);
+  printf("\n");
+  printf("The size of b is %lu\n", sizeof(b));
+
+  int c = -5e8;
+  SHOW_BINARY(c);
+  printf("\n");
+  printf("The size of c is %lu\n", sizeof(c));
+
+  long long d = (long long)c;
+  SHOW_BINARY(d);
+  printf("\n");
+  printf("The size of d is %lu\n", sizeof(d));
+}
+```
+
+```text
+00011101110011010110010100000000
+The size of b is 4
+0000000000000000000000000000000000011101110011010110010100000000
+The size of b is 8
+11100010001100101001101100000000
+The size of c is 4
+1111111111111111111111111111111111100010001100101001101100000000
+The size of d is 8
+```
+
+For the truncating process, like casting `unsigned` into `unsigned short`, bits are truncated rudely.
+
+
+### Addition, Negation, Multiplication, Shifting
+

@@ -79,6 +79,7 @@ build
 
 # ignore pdf slides and lab handouts
 slides
+src/Lecture1/compile
 src/Labs/datalab/datalab.pdf
 
 # ignore binary files of several labs

@@ -1,0 +1,330 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-primary: #0a0e27;
+    --bg-secondary: #1a1f3a;
+    --accent-cyan: #00fff5;
+    --accent-green: #00ff88;
+    --accent-purple: #b967ff;
+    --text-primary: #e0e6ed;
+    --text-secondary: #94a3b8;
+    --terminal-bg: #0d1117;
+}
+
+body {
+    font-family: 'Courier New', Monaco, 'Consolas', monospace;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Binary Rain Background */
+#matrix-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.15;
+}
+
+/* Header */
+header {
+    padding: 2rem 5%;
+    background: linear-gradient(135deg, rgba(0, 255, 245, 0.1) 0%, rgba(185, 103, 255, 0.1) 100%);
+    border-bottom: 2px solid var(--accent-cyan);
+    box-shadow: 0 0 30px rgba(0, 255, 245, 0.3);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: var(--accent-cyan);
+    text-shadow: 0 0 10px var(--accent-cyan), 0 0 20px var(--accent-cyan);
+    margin-bottom: 0.5rem;
+    letter-spacing: 2px;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    color: var(--accent-green);
+    margin-bottom: 1rem;
+}
+
+.tagline {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Main Content */
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 5%;
+}
+
+/* Terminal Section */
+.terminal {
+    background: var(--terminal-bg);
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 3rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.terminal-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #30363d;
+}
+
+.terminal-dots {
+    display: flex;
+    gap: 8px;
+    margin-right: 1rem;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.dot-red { background: #ff5f56; }
+.dot-yellow { background: #ffbd2e; }
+.dot-green { background: #27ca40; }
+
+.terminal-title {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.code-block {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    line-height: 1.8;
+}
+
+.code-line {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.prompt {
+    color: var(--accent-green);
+    margin-right: 0.5rem;
+}
+
+.comment {
+    color: var(--text-secondary);
+}
+
+.keyword {
+    color: var(--accent-purple);
+}
+
+.string {
+    color: var(--accent-cyan);
+}
+
+.code-link {
+    color: var(--accent-cyan);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--accent-cyan);
+}
+
+.code-link:hover {
+    color: var(--accent-green);
+    border-bottom-style: solid;
+}
+
+/* Lectures Grid */
+.lectures-section {
+    margin: 3rem 0;
+}
+
+.section-title {
+    font-size: 1.8rem;
+    color: var(--accent-cyan);
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    border-left: 4px solid var(--accent-green);
+    padding-left: 1rem;
+}
+
+.lectures-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.lecture-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--accent-cyan);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.lecture-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 245, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.lecture-card:hover::before {
+    left: 100%;
+}
+
+.lecture-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 255, 245, 0.3);
+    border-color: var(--accent-green);
+}
+
+.lecture-number {
+    display: inline-block;
+    background: var(--accent-cyan);
+    color: var(--bg-primary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-bottom: 0.75rem;
+}
+
+.lecture-title {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.lecture-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.lecture-link {
+    display: inline-block;
+    color: var(--accent-cyan);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.lecture-link:hover {
+    color: var(--accent-green);
+}
+
+.lecture-link::after {
+    content: ' \2192';
+    transition: transform 0.3s ease;
+}
+
+.lecture-link:hover::after {
+    transform: translateX(5px);
+}
+
+/* Stats Section */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 3rem 0;
+}
+
+.stat-card {
+    background: var(--bg-secondary);
+    border-left: 3px solid var(--accent-purple);
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    color: var(--accent-cyan);
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 10px var(--accent-cyan);
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 2rem;
+    border-top: 1px solid var(--accent-cyan);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.footer-link {
+    color: var(--accent-cyan);
+    text-decoration: none;
+}
+
+.footer-link:hover {
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    .subtitle {
+        font-size: 0.95rem;
+    }
+
+    .lectures-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+    }
+}
+
+/* Glowing effect */
+@keyframes glow {
+    0%, 100% { text-shadow: 0 0 10px var(--accent-cyan), 0 0 20px var(--accent-cyan); }
+    50% { text-shadow: 0 0 20px var(--accent-cyan), 0 0 40px var(--accent-cyan); }
+}
+
+.glow {
+    animation: glow 2s ease-in-out infinite;
+}

@@ -1,5 +1,11 @@
 # Lecture 2-3 Bits, Bites and Integers
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+
 ## Representing Information as Bits
 
 - Base 2 Number representations (十进制和二进制的转化)

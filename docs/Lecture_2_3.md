@@ -1,10 +1,15 @@
-# Lecture 2-3 Bits, Bites and Integers
+# Lecture 2-3 Bits, Bytes and Integers
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [
+    {left: '$$', right: '$$', display: true},
+    {left: '\\[', right: '\\]', display: true},
+    {left: '$', right: '$', display: false},
+    {left: '\\(', right: '\\)', display: false}
+]});"></script>
 
 ## Representing Information as Bits
 
@@ -376,7 +381,7 @@ $$
 
 > 溢出的本质是数据超过了容器的边界
 
-对于 $w$ 位的有符号整数而言，可以表示的范围是：$[-2^{w-1}, 2^{w-1}-1]$，因此两者加和可能的范围是：
+对于 $ w $ 位的有符号整数而言，可以表示的范围是：$ [-2^{w-1}, 2^{w-1}-1] $，因此两者加和可能的范围是：
 
 $$
 \text{TAdd} \in [-2^{w}, 2^{w}-2]

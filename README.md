@@ -15,8 +15,9 @@ Dive into the world of the computer systems. This repo maintains all source code
 │   │   ├── favicon
 │   │   └── Lecture2
 │   ├── index.html
-│   ├── Lecture_1.md
-│   ├── Lecture_2_3.md
+│   ├── notes
+│   │   ├── Lecture_1.md
+│   │   └── Lecture_2_3.md
 │   └── style.css
 ├── makefile
 ├── README.md

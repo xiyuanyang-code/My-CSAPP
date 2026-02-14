@@ -2,36 +2,42 @@
 
 ## Introduction
 
-Dive into the world of the computer systems.
+Dive into the world of the computer systems. This repo maintains all source codes (including labs and supplementary C/C++ codes) and detailed learning markdown notes while learning CSAPP (2015, 15-­213: Introduction to Computer Systems).
 
 ## Source Code and Demonstrations
 
 ### Files
 
 ```text
-src
-├── Labs
-│   └── datalab
-│       ├── bits.c
-│       ├── bits.h
-│       ├── btest.c
-│       ├── btest.h
-│       ├── datalab.pdf
-│       ├── decl.c
-│       ├── dlc
-│       ├── driver.pl
-│       ├── Driverhdrs.pm
-│       ├── Driverlib.pm
-│       ├── fshow.c
-│       ├── ishow.c
-│       ├── Makefile
-│       ├── README
-│       └── tests.c
-├── Lecture1
-│   └── memory_bug.c
-└── Lecture2
-    ├── bit_operations.cpp
-    └── casting.cpp
+.
+├── docs
+│   ├── assets
+│   │   ├── favicon
+│   │   └── Lecture2
+│   ├── index.html
+│   ├── Lecture_1.md
+│   ├── Lecture_2_3.md
+│   └── style.css
+├── makefile
+├── README.md
+├── run.sh
+└── src
+    ├── Labs
+    │   └── datalab
+    ├── Lecture1
+    │   ├── hello.c
+    │   ├── memory_bug.c
+    │   └── show_compile.sh
+    └── Lecture2
+        ├── bit_operations.cpp
+        ├── casting.cpp
+        ├── endian.cpp
+        ├── overflow.c
+        ├── puzzles.c
+        ├── show_bytes.c
+        ├── signed_multiplications.c
+        ├── string.c
+        └── t_min.c
 ```
 
 ### Usage
@@ -48,6 +54,13 @@ make f=file.cpp        # Compile and run C++ file
 ./run.sh file.cpp      # Compile and run C++ file
 ```
 
+For example:
+
+```bash
+bash run.sh src/Lecture2/puzzles.c
+# It will compile the target file, showing output in terminal and move all build artifacts to `build` directory.
+```
+
 Build artifacts are stored in the `build/` directory.
 
 ## Notes and Materials
@@ -55,5 +68,6 @@ Build artifacts are stored in the `build/` directory.
 - `20260109`: Finish Lecture 1, the basic introduction of the work.
 - `20260116`: Finish Lecture 2, about bit level operations and integer manipulations.
 - `20260116`: Start wracking on Lab1 Data Labs.
+- `20260213`: Finish Lecture 3, about additions and multiplications of integers.
 
 

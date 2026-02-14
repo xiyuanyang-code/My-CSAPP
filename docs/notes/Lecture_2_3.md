@@ -202,7 +202,7 @@ Special cases for TMIN
 The negative number of -2147483648 is -2147483648
 ```
 
-![Signed and Unsigned](assets/Lecture2/signed_and_unsigned.png)
+![Signed and Unsigned](../assets/Lecture2/signed_and_unsigned.png)
 
 ```c
 void show_integers(short number) {
@@ -535,7 +535,7 @@ Result (overflow to positive):
 Decimal:     14 | Hex: 0x000E | Binary: 0000 0000 0000 1110
 ```
 
-![Overflow Visualizations](assets/Lecture2/overflow.png)
+![Overflow Visualizations](../assets/Lecture2/overflow.png)
 
 ### Multiplications
 
@@ -746,7 +746,7 @@ $$x >> k = \lfloor \frac{x}{2^k} \rfloor$$
 
 总结：算数运算（乘法和加法）对不同类型的整数（有符号和无符号）在计算机底层上的运算差异：
 
-![Summary](assets/Lecture2/summary.png)
+![Summary](../assets/Lecture2/summary.png)
 
 > 从数学上看，计算机丢弃高比特位的截断行为等同于**模运算**。
 

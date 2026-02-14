@@ -13,11 +13,14 @@ Dive into the world of the computer systems. This repo maintains all source code
 ├── docs
 │   ├── assets
 │   │   ├── favicon
-│   │   └── Lecture2
+│   │   ├── Lecture2
+│   │   └── Lecture4
 │   ├── index.html
 │   ├── notes
 │   │   ├── Lecture_1.md
-│   │   └── Lecture_2_3.md
+│   │   ├── Lecture_2_3.md
+│   │   ├── Lecture_4.md
+│   │   └── Lecture_5.md
 │   └── style.css
 ├── makefile
 ├── README.md
@@ -29,16 +32,22 @@ Dive into the world of the computer systems. This repo maintains all source code
     │   ├── hello.c
     │   ├── memory_bug.c
     │   └── show_compile.sh
-    └── Lecture2
-        ├── bit_operations.cpp
-        ├── casting.cpp
-        ├── endian.cpp
-        ├── overflow.c
-        ├── puzzles.c
-        ├── show_bytes.c
-        ├── signed_multiplications.c
-        ├── string.c
-        └── t_min.c
+    ├── Lecture2
+    │   ├── bit_operations.cpp
+    │   ├── casting.cpp
+    │   ├── endian.cpp
+    │   ├── overflow.c
+    │   ├── puzzles.c
+    │   ├── show_bytes.c
+    │   ├── signed_multiplications.c
+    │   ├── string.c
+    │   └── t_min.c
+    ├── Lecture4
+    │   ├── casting_fp.c
+    │   ├── dynamic_range.py
+    │   ├── floating_number.c
+    │   └── rounding.py
+    └── Lecture5
 ```
 
 ### Usage
@@ -70,5 +79,6 @@ Build artifacts are stored in the `build/` directory.
 - `20260116`: Finish Lecture 2, about bit level operations and integer manipulations.
 - `20260116`: Start wracking on Lab1 Data Labs.
 - `20260213`: Finish Lecture 3, about additions and multiplications of integers.
+- `20260214`: Finish Lecture 4, about floating points manipulations and calculations.
 
 

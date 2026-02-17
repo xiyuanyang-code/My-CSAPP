@@ -290,10 +290,12 @@ build
 # ignore pdf slides and lab handouts
 slides
 src/Lecture1/compile
+src/Lecture5/compile
 src/Labs/datalab/datalab.pdf
 
 # ignore binary files of several labs
 src/Labs/datalab/btest
 src/Labs/datalab/fshow
 src/Labs/datalab/ishow
+
 

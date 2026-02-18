@@ -13,24 +13,37 @@ Dive into the world of the computer systems. This repo maintains all source code
 
 ```text
 .
+├── Dockerfile
 ├── docs
 │   ├── assets
 │   │   ├── favicon
 │   │   ├── Lecture2
-│   │   └── Lecture4
+│   │   ├── Lecture4
+│   │   └── Lecture5
 │   ├── index.html
 │   ├── notes
 │   │   ├── Lecture_1.md
 │   │   ├── Lecture_2_3.md
 │   │   ├── Lecture_4.md
-│   │   └── Lecture_5.md
+│   │   ├── Lecture_5.md
+│   │   └── Lecture_6.md
 │   └── style.css
 ├── makefile
 ├── README.md
 ├── run.sh
+├── scripts
+│   ├── check_system.sh
+│   └── run_docker_ubuntu.sh
 └── src
     ├── Labs
-    │   └── datalab
+    │   ├── attacklab
+    │   ├── bomblab
+    │   ├── cachelab
+    │   ├── datalab
+    │   ├── malloclab
+    │   ├── proxylab
+    │   ├── README.md
+    │   └── tshlab
     ├── Lecture1
     │   ├── hello.c
     │   ├── memory_bug.c
@@ -50,7 +63,20 @@ Dive into the world of the computer systems. This repo maintains all source code
     │   ├── dynamic_range.py
     │   ├── floating_number.c
     │   └── rounding.py
-    └── Lecture5
+    ├── Lecture5
+    │   ├── main.c
+    │   ├── math_tool.c
+    │   ├── math_tool.h
+    │   ├── multiply.c
+    │   ├── multiply.s
+    │   ├── pointer.c
+    │   ├── pointer.s
+    │   ├── swap.c
+    │   └── swap.s
+    └── scripts
+        ├── compile_example.sh
+        ├── get_assemble.sh
+        └── show_temp_file.sh
 ```
 
 ### Usage
@@ -76,6 +102,40 @@ bash run.sh src/Lecture2/puzzles.c
 
 Build artifacts are stored in the `build/` directory.
 
+### Gcc & GNU Docker (For `MacOS` Only)
+
+Given binaries of several labs (e.g. datalab) are compiled and executed on x86 architecture, therefore, it cannot be executed on M-series Macs because the binaries are compiled for the x86 architecture. Thus, this repo gives you a prepared environment that runs successfully on `Docker`.
+
+```bash
+# build docker images
+docker build --platform linux/amd64 -t csapp .
+```
+
+- After building, running `docker images`, then there should be:
+
+```text
+REPOSITORY    TAG       IMAGE ID       CREATED              SIZE
+csapp         latest    6fb63ad3031a   About a minute ago   2.25GB
+```
+
+- Running Commands:
+
+```bash
+bash scripts/run_docker_ubuntu.sh
+```
+
+- Checking Environments:
+
+```bash
+bash scripts/check_system.sh
+```
+
+```text
+x86_64
+gcc (GCC) 15.2.0
+GNU gdb (Debian 16.3-1) 16.3
+```
+
 ## Notes and Materials
 
 - `20260109`: Finish Lecture 1, the basic introduction of the work.
@@ -83,5 +143,7 @@ Build artifacts are stored in the `build/` directory.
 - `20260116`: Start wracking on Lab1 Data Labs.
 - `20260213`: Finish Lecture 3, about additions and multiplications of integers.
 - `20260214`: Finish Lecture 4, about floating points manipulations and calculations.
+- `20260217`: Finish Lecture 5, machine level programming I: Basics.
+- `20260218`: Finish Lab1: DataLab & Docker Environments
 
 

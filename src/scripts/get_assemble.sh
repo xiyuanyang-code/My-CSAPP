@@ -18,6 +18,7 @@ case "$OS_TYPE" in
     Darwin)
         echo "Detected macOS, using clang..."
         clang -S \
+            -Og \
             --target=x86_64-apple-macos \
             -fno-asynchronous-unwind-tables \
             "$SOURCE_FILE" \

@@ -272,4 +272,37 @@ call_incr:
 
 栈保证递归的实现和其他函数的调用并无二异。
 
+```c
+long pcount_r(unsigned long x) {
+  if (x == 0) {
+    return 0;
+  } else {
+    return (x & 1) + pcount_r(x >> 1);
+  }
+}
+```
+
+```assembly
+pcount_r:
+    movl    $0, %eax        # 将返回值寄存器 %eax 清零（准备好基准情况的返回值）
+    testq   %rdi, %rdi      # 测试参数 %rdi (n) 是否为 0
+    je      .L6             # 如果 n == 0，直接跳转到 .L6 返回 0
+
+    pushq   %rbx            # 因为我们要用 %rbx 存中间值，它是被调用者保存寄存器 Callee-Saved，必须先压栈备份
+    movq    %rdi, %rbx      # 将当前的 n 复制到 %rbx
+    andl    $1, %ebx        # 取 n 的最低位：n & 1，结果存入 %ebx
+    
+    shrq    %rdi            # 逻辑右移 1 位：n >>= 1，为递归调用准备参数
+    call    pcount_r        # 递归调用 pcount_r(n >> 1)，结果会返回到 %rax 中
+    
+    addq    %rbx, %rax      # 将之前保存的最低位 (%rbx) 加到递归返回的结果 (%rax) 上
+    popq    %rbx            # 恢复之前备份的 %rbx 值，维持栈平衡和寄存器原样
+
+.L6:
+    rep; ret                # 返回。rep; ret 是为了避免某些处理器在直接跳转到 ret 时产生分支预测性能问题
+```
+
+![Recursion](../assets/Lecture7/recursion.png)
+
+- rbx 是 calle-saved 的，因此实现的时候需要先将原始寄存器的值压入栈中，然后最后等函数返回的过程中出栈维持原状即可。
 

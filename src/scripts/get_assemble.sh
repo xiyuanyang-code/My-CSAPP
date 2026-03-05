@@ -27,8 +27,7 @@ case "$OS_TYPE" in
     Linux)
         echo "Detected Linux, using gcc..."
         gcc -S \
-            -masm=intel \
-            -fno-asynchronous-unwind-tables \
+            -Og \
             "$SOURCE_FILE" \
             -o "$OUTPUT_FILE"
         ;;

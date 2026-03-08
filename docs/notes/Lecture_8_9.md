@@ -1,4 +1,4 @@
-# Machine Level Programming IV: Data
+# Machine Level Programming IV: Data & V: Advanced Topics
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
@@ -302,10 +302,176 @@ vec_ele:
 
 ## Structs
 
-### Allocations
+- 结构体中的数据存储在一段连续的内存块中 (block of memory)
+- 编译器会跟踪每个数据的起始位置（编译时完成）
 
-### Access
+```c
+#include <stddef.h>
+struct rec {
+  size_t i;
+  int a[4];
+  struct rec *next;
+};
+
+int get_a(struct rec *r, size_t idx) { return r->a[idx]; }
+
+int *get_ap(struct rec *r, size_t idx) { return &(r->a[idx]); }
+```
+
+```assembly
+	.file	"structs.c"
+	.text
+	.globl	get_a
+	.type	get_a, @function
+get_a:
+.LFB0:
+	.cfi_startproc
+	movl	8(%rdi,%rsi,4), %eax
+	ret
+	.cfi_endproc
+.LFE0:
+	.size	get_a, .-get_a
+	.globl	get_ap
+	.type	get_ap, @function
+get_ap:
+.LFB1:
+	.cfi_startproc
+	leaq	8(%rdi,%rsi,4), %rax
+	ret
+	.cfi_endproc
+.LFE1:
+	.size	get_ap, .-get_ap
+	.ident	"GCC: (GNU) 15.2.0"
+	.section	.note.GNU-stack,"",@progbits
+
+```
+
+- `get_a` 函数会根据输入参数的索引取到特定的内存位置并取值
+	- `movl	8(%rdi,%rsi,4), %eax`: 取出的目标地址是 `rdi + 8 + 4* rsi`
+		- 根据定义的顺序，第一个类型是一个占 8 个字节的 size_t 变量
+		- rdi 代表第一个输入参数，即地址
+		- rsi 代表第二个输入参数，即数组 a 内部的偏移量，因此乘 4（是 int 类型的变量）
+- `get_ap`: `leaq	8(%rdi,%rsi,4), %rax` 一模一样的操作，只不过直接取地址存入寄存器，而不是使用 movel 取出对应地址上的值。
+
+### Linked List
+
+```c
+#include <stddef.h>
+struct rec {
+  size_t i;
+  int a[4];
+  struct rec *next;
+};
+
+void set_val(struct rec *r, int val) {
+  while (r) {
+    int i = r->i;
+    r->a[i] = val;
+    r = r->next;
+  }
+}
+```
+
+```assembly
+	.file	"linked_list.c"
+	.text
+	.globl	set_val
+	.type	set_val, @function
+set_val:
+.LFB0:
+	.cfi_startproc
+	jmp	.L2
+	.p2align 4
+.L3:
+	movslq	(%rdi), %rax
+	movl	%esi, 8(%rdi,%rax,4)
+	movq	24(%rdi), %rdi
+.L2:
+	testq	%rdi, %rdi
+	jne	.L3
+	ret
+	.cfi_endproc
+.LFE0:
+	.size	set_val, .-set_val
+	.ident	"GCC: (GNU) 15.2.0"
+	.section	.note.GNU-stack,"",@progbits
+```
+
+- 循环的判断是判断输入参数 r 是否为 0: `testq	%rdi, %rdi`
+- 循环内部的代码在 L3：
+	- 从寄存器 rdi 中的地址读取一个数，存入 rax 中
+	- 然后将存储在 esi 中的值写入 `8(%rdi,%rax,4)`: `a[i]`
+	- next 指针的位置移位是 24 位，因此最后一步是在做 next 指针的更新，把移位 24 的地址进行取值（取出来的值仍然是一个地址）更新给当前的 rdi 寄存器
 
 ### Alignment
 
+在大多数现代系统（如 x86-64）中，对齐遵循以下两个基本原则：
 
+- 成员对齐：每个成员的起始地址必须是它自身大小的倍数。
+	- char (1 字节)：可以放在任何地址。
+	- short (2 字节)：地址必须是 2 的倍数。
+	- int / float (4 字节)：地址必须是 4 的倍数。
+	- double / long / 指针 (8 字节)：地址必须是 8 的倍数。
+	- long double (16 字节)：地址必须是 16 的倍数。
+- 整体对齐：整个结构体的总大小，必须是**内部最大成员大小的倍数**（为了保证在结构体数组中，每个元素的成员都能对齐）
+
+对于结构体组成的数组，每一个结构体需要保证对齐！
+
+#### Why Alignment?
+
+- CPU 和主存通过总线读取数据，不是逐字节读取的，而是每次读取一段数据块。对齐可以让 CPU 不需要读取两次数据来获得一个数据的值。
+
+
+```c
+#include <stdio.h>
+
+struct a {
+  short i;
+  float v;
+  short j;
+} a_va;
+
+struct b {
+  short i;
+  short j;
+  float v;
+} b_va;
+
+struct c {
+  char c;
+  int i;
+  char d;
+} c_va;
+
+struct d {
+  int i;
+  char c;
+  char d;
+} d_va;
+
+int main() {
+  printf("The length of structure a: %ld\n", sizeof(a_va));
+  printf("The length of structure b: %ld\n", sizeof(b_va));
+  printf("The length of structure c: %ld\n", sizeof(c_va));
+  printf("The length of structure d: %ld\n", sizeof(d_va));
+}
+```
+
+```text
+The length of structure a: 12
+The length of structure b: 8
+The length of structure c: 12
+The length of structure d: 8
+```
+
+可以看到，在定义结构体的时候，不同变量的摆放顺序会影响内存使用的大小！
+
+## Floating Points
+
+> Skip this part for this time...
+
+## Memory Layout
+
+## Buffer Overflow
+
+## Unions

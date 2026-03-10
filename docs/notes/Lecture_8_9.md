@@ -466,6 +466,49 @@ The length of structure d: 8
 
 可以看到，在定义结构体的时候，不同变量的摆放顺序会影响内存使用的大小！
 
+## Unions
+
+- 结构体为每一个字段分配连续内存并对齐
+- Unions: 只为最大的变量分配内存
+
+```c
+#include <stdio.h>
+typedef union {
+  float f;
+  unsigned u;
+} bit_float_t;
+
+float bit_2_float(unsigned u) {
+  bit_float_t arg;
+  arg.u = u;
+  return arg.f;
+}
+
+unsigned float_2_bit(float f) {
+  bit_float_t arg;
+  arg.f = f;
+  return arg.u;
+}
+
+int main() {
+  // both for 4 bytes
+  printf("The length of float: %lu\n", sizeof(float));
+  printf("The length of unsigned: %lu\n", sizeof(unsigned));
+
+  float num_1 = 0.01;
+  unsigned num_2 = 20;
+
+  printf("Casting directly: %u\n", (unsigned) num_1);
+  printf("Casting directly: %f\n", (float) num_2);
+  printf("Casting using float_2_bit: %u\n", float_2_bit(num_1));
+  printf("Casting using bit_2_float: %f\n", bit_2_float(num_2));
+  return 0;
+}
+```
+
+- 直接的类型转换是 Value conversion (numeric value is converted)
+- 但是使用 Union 会保证 bit-level 的类型不变！因此不可以当做 casting 用！
+
 ## Floating Points
 
 > Skip this part for this time...
@@ -669,6 +712,13 @@ ASLR: Address Space Layout Randomization
 
 即便攻击者成功地把恶意代码（图中蓝紫色部分）塞进了栈里，当 CPU 试图去运行这块区域的内容时，硬件会立刻发现“这块区域禁止执行”，从而强制关闭程序，防止攻击成功。
 
+> **内存的执行权限**
+
+和文件的执行权限类似，内存的执行权限会控制 CPU 执行某块内存区域中的代码，例如栈内存、堆内存是不可执行的，防止黑客恶意使用栈溢出进行工具、注入危险程序。
+
+- text 等存储程序机器执行代码的位置是可执行的。
+
+
 #### Stack Canary Protections
 
 当你编译程序并开启了保护（如 -fstack-protector）时，编译器会在每个“危险”函数的栈帧中插入一个随机生成的秘密数值。这个值被放置在 **局部变量**（如你的 buffer） 和 **返回地址**（Return Address） 之间。
@@ -677,7 +727,15 @@ ASLR: Address Space Layout Randomization
 
 Canary 通常为 8 bytes，是一个 long 类型的随机数。
 
+![](../assets/Lecture8/canary.png)
 
+- `mov %fs:0x28, %rax`: 从线程局部存储（TLS）中读取一个随机值（Canary），存入 %rax 寄存器。`%fs:0x28` 是一个特殊的内存地址，存放着当前线程的 Stack Canary 值。
+- `mov %rax, 0x8(%rsp)`: 保存 canary 到栈上
+- `mov 0x8(%rsp), %rax`: 读取 canary 值
+- `xor %fs:0x28, %rax`: 与原始的 canary 值进行异或比较。
 
+这会保证 caller 的下一个地址不会被篡改，避免程序的控制流被恶意篡改。
 
-## Unions
+> Return-Oriented Programming Attacks
+- 不注入代码，而是使用现有代码，得到系统权限。（同样利用栈溢出）
+

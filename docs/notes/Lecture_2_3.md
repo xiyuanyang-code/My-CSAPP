@@ -264,6 +264,26 @@ If there is a mix of unsigned and signed in single expression, **signed values w
 
 While doing casting, the bit pattern remains **maintained**, but reinterpreted.（系统的类型转换，无论是强制的还是非强制的，都不会改变系统内存中的 0/1 状态）
 
+e.g.  `U2T(T2U(x) Uadd T2U(y)) = x Tadd y?`
+
+Of course it is! 
+
+- `U2T(T2U(x)) = x`：互为逆映射（一一对应）
+- 无论是 U2T, T2U 还是 Uadd 还是 Tadd，都**遵循在比特位上**相同的运算逻辑，因此只要最终返回值的类型相同，返回的值也相同！
+
+```c
+#include <stdio.h>
+int main(){
+    int a = -10;
+    unsigned int b = (unsigned) a;
+    printf("%u", b);
+    // will print 4294967286
+    return 0;
+}
+```
+
+很常见的误区：不会输出 10！二进制比特位的状态不会改变。
+
 #### `abs(INT_MIN)`
 
 由于有符号数使用补码表示，负数范围比正数范围多一个。对于 64 位的系统，int 的最大整数是2147483647，最小整数是 -2147483648。这意味着 $-2147483648$ 没有对应的正数可以表示在 `int` 类型中。因此，总可以找到一个最小的负值，使其成为正数的时候会发生溢出现象。

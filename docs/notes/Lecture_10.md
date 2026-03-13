@@ -1,5 +1,16 @@
 # Program Optimizations
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [
+    {left: '$$', right: '$$', display: true},
+    {left: '\\[', right: '\\]', display: true},
+    {left: '$', right: '$', display: false},
+    {left: '\\(', right: '\\)', display: false}
+]});"></script>
+
 ## General Useful Optimizations
 
 在算法侧主要针对程序进行时间复杂度的大幅优化、但是在真实的程序运行时中，**常数时间优化**也是一个非常重要的命题。
@@ -259,4 +270,101 @@ array[9]: 1.000000
 
 随着现代 CPU 的快速发展，程序的运行可以进行**并行**加速（就像 GPU 加速计算图一样）,如何让编译器生成可以 Instruction­‐Level Parallelism 的代码是一个重要的优化方向。
 
+### Benchmarking
+
+Cycles per element: 单位操作的时钟周期数
+
+$$
+T = CPE * n + Overhead
+$$
+
+- 良好的编程习惯可以生成编译器友好的代码，减少 CPE 的值
+- 与此同时，编译器友好的代码也可以减少循环中的 overhead，从整体的时间上减少计算时间。
+
+### Modern CPU Design
+
+![](../assets/Lecture10/cpu_design.png)
+
+### SuperScaler Processor
+
+定义：在一个时钟周期中，可以处理**多条指令**。
+
+- The instructions are retrieved from a sequential instruction stream and are usually scheduled dynamically.
+
+### Pipelined Functional Units
+
+计算机为了提高 CPU 的利用率，实现了**流水线技术**，流水线技术允许 CPU 在没有完成上一条指令的时候开始进行下一条指令的计算。具体来说：
+
+- Computation is divided into stages
+- Pass partial computations from stage to stage
+- Stage `i` can start on new computation once values passed to `i+1`.
+
+### Loop Unrolling
+
+现代 CPU 哪怕是单核单处理器，在一个时钟周期中也可以同时处理多个运算操作。而流水线运行则充分利用 CPU 的性能，极大的压缩了程序运行的时间。但是，对于那种**严格依赖顺序进行计算**的计算图，CPU 很难进行流水线操作，因为下一步运算的值往往需要依赖上一步的循环结果。(Sequential Dependency)
+
+例如，如果对一个数组遍历，进行如下的计算：
+
+```
+x = x OP d[i]
+```
+
+原始的代码编译器无法进行计算图的优化，因为是严格的 sequential 的结构，我们尝试做出了如下的优化:
+
+```
+x = (x OP d[i]) OP d[i+1]
+# 一次处理两个元素
+```
+
+在当前运算顺序下，处理器会先计算括号内部的逻辑，但是**括号外部的运算依赖于先进行的括号内部的运算结果**，因此此处的 CPE 并没有变！但是如果优化运算顺序:
+
+```
+x = x OP (d[i] OP d[i+1])
+```
+
+> 因为操作数的溢出等问题，编译器无法自动优化 CPE（这会潜在的导致程序的输出结果和正确性不同），因此需要程序员进行手动优化。
+
+![](../assets/Lecture10/reass_comp.png)
+
+可以发现，**上一步循环的第二步和下一步循环的第一步**可以同时进行！CPE 直接减半。
+
+> 程序的性能不会无止境的优化，程序性能的上限主要由**延迟(Latency)** 和 **吞吐量极限(Throughput Limit)** 决定。延迟主要由代码的逻辑顺序决定（是否存在恼人的 linear dependency），而吞吐量极限只要由硬件的上限决定。对于程序而言，我们更希望硬件满功率运行，即程序的运行上限不断毕竟硬件的吞吐量上限。
+
+### Unrolling and Accumulating
+
+对于一个线性的循环，我们可以一般化上述**展开-并行计算**的逻辑。
+
+- Unroll to any degree $L$（循环展开度 L）
+*   **含义**：把循环体里的代码复制 $L$ 份，每次循环处理 $L$ 个数据，而不是 1 个。
+*   **作用**：减少了循环控制指令（如判断 `i < N`、跳转）的开销。
+
+- Accumulate K results in parallel（并行累积 K 路结果）
+*   **含义**：这是最关键的一步！不再只用一个变量 `result` 累加，而是开辟 $K$ 个独立的累加器（`result_0`, `result_1`, ..., `result_K`）。
+*   **操作**：
+    *   第 1 个数乘给 `result_0`
+    *   第 2 个数乘给 `result_1`
+    *   ...
+    *   第 $K+1$ 个数再乘给 `result_0`
+*   **作用**：**打破了数据依赖链！**
+    *   计算 `result_0` 的新值时，不需要等待 `result_1` 完成。
+    *   这 $K$ 条计算路径是**完全独立**的，CPU 可以同时在 $K$ 条路径上发射指令，充分利用**吞吐量**。
+
+> 为了保证代码整齐，通常让展开的倍数 $L$ 是并行路数 $K$ 的整数倍。这样每一轮大循环里，每个累加器正好工作 $L/K$ 次。（保证最优展开）
+
 ## Dealing with Conditionals
+
+流水线技术可以极大程度优化人类程序员编写的循环代码，但是一个很关键的问题是**如何让流水线正确的预测分支**。如果流水线预测分支错误，将会昂贵的浪费非常多的计算时间。
+
+- Branch Taken: Transfer control to branch target
+- Branch Not-Taken: Continue with next instruction in sequence.
+
+### Branch Predictions
+
+流水线技术本身（作为一种硬件执行策略）不会“凭空”改变寄存器或主存中的值，值的改变是由具体的指令（如 ADD, STORE, JUMP）决定的。但是，当遇到分支跳转时，流水线的处理方式（如冲刷、预测失败恢复）会直接影响“**哪些指令最终被执行**”，并且不会对寄存器和主存产生实际影响。
+
+当硬件发现预测错误时，会立即触发异常处理机制。硬件会丢弃（Discard/Flush） 所有在错误路径上已经进入流水线但尚未正式提交（Commit）的指令结果。这些指令产生的临时数据会被标记为无效，绝不会写入**最终的寄存器文件或主存**。
+
+如何在更加激进的流水线策略下实现更高的分支预测正确的成功率是现代 CPU 设计和硬件优化的一个非常关键的方向！
+
+
+

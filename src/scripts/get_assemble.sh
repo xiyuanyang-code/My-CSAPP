@@ -18,7 +18,7 @@ case "$OS_TYPE" in
     Darwin)
         echo "Detected macOS, using clang..."
         clang -S \
-            -Og \
+            -O1 \
             --target=x86_64-apple-macos \
             -fno-asynchronous-unwind-tables \
             "$SOURCE_FILE" \
@@ -27,7 +27,7 @@ case "$OS_TYPE" in
     Linux)
         echo "Detected Linux, using gcc..."
         gcc -S \
-            -Og \
+            -O1 \
             "$SOURCE_FILE" \
             -o "$OUTPUT_FILE"
         ;;

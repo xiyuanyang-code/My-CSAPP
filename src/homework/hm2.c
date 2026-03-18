@@ -132,8 +132,14 @@ void question_7() {
   unsigned char buf[8] = {0};
 
   memcpy(buf, &a, sizeof(a));
+  SHOW_BINARY(a);
+  // 0001 0010 0011 0100 0101 0110 0111 1000
   memcpy(buf + 4, &b, sizeof(b));
+  SHOW_BINARY(b);
+  // 1001 1010 1011 1100
   memcpy(buf + 6, &c, sizeof(c));
+  SHOW_BINARY(c);
+  // 1101 1110
 
   for (int i = 0; i < 8; i++) {
     printf("buf[%d]: 0x%02X\n", i, buf[i]);

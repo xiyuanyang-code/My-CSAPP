@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 void showBinary(const void *data, int sizeBytes, const char *typeName) {
   const unsigned char *bytes = (const unsigned char *)data;
@@ -125,6 +126,21 @@ void question_5() {
 }
 
 void question_7() {
+  int a = 0x12345678;
+  short b = 0x9ABC;
+  char c = 0xDE;
+  unsigned char buf[8] = {0};
+
+  memcpy(buf, &a, sizeof(a));
+  memcpy(buf + 4, &b, sizeof(b));
+  memcpy(buf + 6, &c, sizeof(c));
+
+  for (int i = 0; i < 8; i++) {
+    printf("buf[%d]: 0x%02X\n", i, buf[i]);
+  }
+}
+
+void question_8() {
   float num = -12.25;
   float num_2 = -12.00;
   printf("Current size of num: %ld\n", sizeof(num));
@@ -211,6 +227,8 @@ int main() {
   question_5();
   printf("\n\n");
   question_7();
+  printf("\n\n");
+  question_8();
   printf("\n\n");
   question_10();
   printf("\n\n");

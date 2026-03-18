@@ -125,6 +125,27 @@ void question_5() {
   printf("Result for mask_3 in question 5.4: %d\n", question_5_4(mask_3));
 }
 
+void question_6() {
+  int num_a, num_b;
+  int res_sum, res_mul;
+  num_a = 0x78563412;
+  num_b = 0x7F5E3B1A;
+  res_sum = num_a + num_b;
+  res_mul = num_a * num_b;
+  printf("Small Endian: sum is %d %X, and mul is %d %X,\n", res_sum, res_sum,
+         res_mul, res_mul);
+  SHOW_BINARY(res_sum);
+  SHOW_BINARY(res_mul);
+  num_a = 0x12345678;
+  num_b = 0x1A3B5E7F;
+  res_sum = num_a + num_b;
+  res_mul = num_a * num_b;
+  printf("Big Endian: sum is %d %X, and mul is %d %X,\n", res_sum, res_sum,
+         res_mul, res_mul);
+  SHOW_BINARY(res_sum);
+  SHOW_BINARY(res_mul);
+}
+
 void question_7() {
   int a = 0x12345678;
   short b = 0x9ABC;
@@ -231,6 +252,8 @@ int main() {
   question_4();
   printf("\n\n");
   question_5();
+  printf("\n\n");
+  question_6();
   printf("\n\n");
   question_7();
   printf("\n\n");

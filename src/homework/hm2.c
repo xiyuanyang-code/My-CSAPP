@@ -75,9 +75,9 @@ void question_4() {
   SHOW_BINARY(mul_ans);
 }
 
-int question_5_1(int x) { return !!!(~x); }
+int question_5_1(int x) { return !!(x); }
 
-int question_5_2(int x) { return !!!(x); }
+int question_5_2(int x) { return !!(~x); }
 
 int question_5_3(int x) { return !(~(x >> 24)); }
 

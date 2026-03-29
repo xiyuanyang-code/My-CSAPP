@@ -515,4 +515,186 @@ drwxr-xr-x@ 17 xiyuanyang  staff   544 Mar 24 10:31 src
 
 ## Signals
 
+### Shells
+
+Shell: an application program that runs programs on behalf of the user:
+- `sh`
+- `tcsh`/`csh`
+- `bash`/`zsh`
+
+```c
+int main() {
+  char cmdline[MAXLINE];
+  while (1) {
+    // read
+    fgets(cmdline, MAXLINE, stdin);
+    if (feof(stdin)) {
+      exit(0);
+    }
+
+    // evaluate
+    eval(cmdline);
+  }
+}
+
+```
+
+Shell 执行的功能是和用户的字符串输入进行交互，并将对应的指令解析、发送到操作系统内核。
+
+- 读取用户输入直到 EOF 终止符
+- 对用户输入的字符串数组 `cmdline` 进行解析:
+    - `argv` 是根据空格解析出的数组
+    - `argv[0]` 是程序的名称，剩下的都是后缀和参数
+        - 如果系统识别是对应的 builtin_command，系统会创建一个子进程运行 `execve(argv[0], argv, environ)`
+    - 命令行交互的时候可以选择是 run in background or run in foreground:
+        - run in background: 需要在命令最后加上一个 `&`，这样子进程就会放入后台运行
+            - 存在问题: 子进程变成僵尸进程，进程资源不会被回收
+        - run in fg: 不需要加上 `&`，但是父进程的后续进行需要等待子进程的完成（这也是一般的 shell 交互逻辑）
+            - 需要等待 waitpid 的结束
+
+```c
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
+#define MAXLINE 100
+#define MAXARGS 100
+extern char **environ;
+
+void unix_error(char *msg) {
+  fprintf(stderr, "%s: %s\n", msg, strerror(errno));
+  exit(1);
+}
+
+pid_t Fork(void) {
+  pid_t pid;
+
+  if ((pid = fork()) < 0) {
+    fprintf(stderr, "Fork error: %s\n", strerror(errno));
+    exit(0);
+  }
+
+  return pid;
+}
+
+int parseline(char *buf, char **argv) {
+  char *delim; /* Points to first space delimiter */
+  int argc;    /* Number of args */
+  int bg;      /* Background job? */
+
+  buf[strlen(buf) - 1] = ' ';   /* Replace trailing '\n' with space */
+  while (*buf && (*buf == ' ')) /* Ignore leading spaces */
+    buf++;
+
+  /* Build the argv list */
+  argc = 0;
+  while ((delim = strchr(buf, ' '))) {
+    argv[argc++] = buf;
+    *delim = '\0';
+    buf = delim + 1;
+    while (*buf && (*buf == ' ')) /* Ignore spaces */
+      buf++;
+  }
+  argv[argc] = NULL;
+
+  if (argc == 0) /* Ignore blank line */
+    return 1;
+
+  /* Should the job run in the background? */
+  if ((bg = (*argv[argc - 1] == '&')) != 0)
+    argv[--argc] = NULL;
+
+  return bg;
+}
+
+int builtin_command(char **argv) {
+  if (!strcmp(argv[0], "quit")) /* quit command */
+    exit(0);
+  if (!strcmp(argv[0], "&")) /* Ignore singleton & */
+    return 1;
+
+  return 0; /* Not a builtin command */
+}
+
+void eval(char *cmdline) {
+  char *argv[MAXARGS]; /* Argument list execve() */
+  char buf[MAXLINE];   /* Holds modified command line */
+  int bg;              /* Should the job run in bg or fg? */
+  pid_t pid;           /* Process id */
+
+  strcpy(buf, cmdline);
+  bg = parseline(buf, argv);
+  if (argv[0] == NULL)
+    return; /* Ignore empty lines */
+
+  if (!builtin_command(argv)) {
+    if ((pid = Fork()) == 0) { /* Child runs user job */
+      if (execve(argv[0], argv, environ) < 0) {
+        printf("%s: Command not found.\n", argv[0]);
+        exit(0);
+      }
+    }
+
+    /* Parent waits for foreground job to terminate */
+    if (!bg) {
+      int status;
+      if (waitpid(pid, &status, 0) < 0)
+        unix_error("waitfg: waitpid error");
+    } else
+      printf("%d %s", pid, cmdline);
+  }
+  return;
+}
+
+int main() {
+  char cmdline[MAXLINE];
+  while (1) {
+    // read
+    fgets(cmdline, MAXLINE, stdin);
+    if (feof(stdin)) {
+      exit(0);
+    }
+
+    // evaluate
+    eval(cmdline);
+  }
+}
+
+```
+
+```text
+bash run.sh src/Lecture14/shellex.c
+
+/bin/ls
+build           docs            README.md       scripts         src
+Dockerfile      makefile        run.sh          slides
+/bin/pwd
+/Users/xiyuanyang/Desktop/Dev/CSAPP
+/usr/bin/whoami
+xiyuanyang
+quit
+```
+
+可以看到，我们写了一个非常简单的 eval 函数，可以实现 shell 的最基本的一些功能。
+
+### Signals
+
+Signal: a small message that nofifies a process that an event of some type has occured in the systems:
+
+- 由内核发出到某一个进程中，有时是在一个新进程创建的时候。
+- signals have IDs
+- Only information in a signal is its ID and the fact that it arrived.
+
+### Sending a Signal
+
+Kernel sends (delivers) a signal to a destination process by **updating some state in the context of the destination process**. Linux 系统没有额外设计一套复杂的内核和进程之间的通信机制来进行 signals 的传输和接受，内核并没有向进程的内存空间写入任何数据，也没有打断进程当前的指令流。内核只是在该进程对应的 进程控制块（PCB，Linux 中是 task_struct） 中，将某个比特位（bit）从 0 改为 1。
+
+### Receiving a Signal
+
+- Ignore the signal
+- Terminate the process
+- Catch the signal by executing a user-level function called signal handlers.
+
 ## Non-local Jumps

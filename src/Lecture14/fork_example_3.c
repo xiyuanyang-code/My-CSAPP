@@ -1,3 +1,4 @@
+#include <signal.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -76,7 +77,7 @@ void fork_9_wait() {
   printf("L3\n");
 }
 
-void fork10() {
+void fork_10() {
   int N = 100;
   pid_t pid[N];
   int i, child_status;
@@ -85,6 +86,33 @@ void fork10() {
     if ((pid[i] = fork()) == 0) {
       exit(100 + i); /* Child */
     }
+  for (i = 0; i < N; i++) { /* Parent */
+    pid_t wpid = wait(&child_status);
+    if (WIFEXITED(child_status))
+      printf("Child %d terminated with exit status %d\r", wpid,
+             WEXITSTATUS(child_status));
+    else
+      printf("Child %d terminate abnormally\n", wpid);
+  }
+}
+
+void fork_12() {
+  int N = 10;
+  pid_t pid[N];
+  int i, child_status;
+
+  for (i = 0; i < N; i++)
+    if ((pid[i] = fork()) == 0) {
+      while (1) {
+      }
+    }
+  
+  // killing process by sending signals
+  for (i = 0; i < N; i++){
+    printf("Killing Process: %d\n", pid[i]);
+    kill(pid[i], SIGINT);
+  }
+
   for (i = 0; i < N; i++) { /* Parent */
     pid_t wpid = wait(&child_status);
     if (WIFEXITED(child_status))
@@ -118,5 +146,6 @@ int main() {
   // fork_9_nonwait();
   // fork_9_wait();
   // fork10();
+  fork_12();
   return 0;
 }

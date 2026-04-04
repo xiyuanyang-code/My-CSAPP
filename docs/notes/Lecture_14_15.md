@@ -689,7 +689,7 @@ Signal: a small message that nofifies a process that an event of some type has o
 
 ### Sending a Signal
 
-Kernel sends (delivers) a signal to a destination process by **updating some state in the context of the destination process**. Linux 系统没有额外设计一套复杂的内核和进程之间的通信机制来进行 signals 的传输和接受，内核并没有向进程的内存空间写入任何数据，也没有打断进程当前的指令流。内核只是在该进程对应的 进程控制块（PCB，Linux 中是 task_struct） 中，将某个比特位（bit）从 0 改为 1。
+Kernel sends (delivers) a signal to a destination process by **updating some state in the context of the destination process**. Linux 系统没有额外设计一套复杂的内核和进程之间的通信机制来进行 signals 的传输和接受，内核并没有向进程的内存空间写入任何数据，也没有打断进程当前的指令流。内核只是在该进程对应的进程控制块（PCB，Linux 中是 task_struct）中，将某个比特位（bit）从 0 改为 1。
 
 ### Receiving a Signal
 
@@ -697,4 +697,119 @@ Kernel sends (delivers) a signal to a destination process by **updating some sta
 - Terminate the process
 - Catch the signal by executing a user-level function called signal handlers.
 
-## Non-local Jumps
+从执行上，当一个 process 接收到一个 signal 的时候，系统控制权会被移交给 Signal handler, 他会决定处理信号的具体方式（捕获信号）
+
+> 处理信号的方式非常像 Exceptions
+
+### Pending and Blocked Signals
+
+- Pending: sent but not received
+    - 对于某一个特定的 signal，只能最多存在一个 pending signals！
+    - **Signals are not queued**.
+      - 对于一个特定的 process，如果当前已经有一个 k-type 的 signal 处于 pending 状态，那么这个时候后续发送的 k-type 的 signals 就会被丢弃。
+- A process can block the receipt of certain signals
+  - 这不会影响 signals 的传递过程，但是会阻塞 signals 的接收过程
+
+系统利用两个 bit-vectors 来存储 pending 和 blocked 的状态。
+
+- Pending: represents the set of pending signals.
+  - 当第 k 位被设置为 1，代表这个 pending signal 被发送
+  - 当第 k 位被设置为 0，代表这个 pending signal 被接收
+- Blocked: represents the set of blocked signals.
+  - `sigprocmask` function used to be set and cleared.
+  - **Signal Mask**.
+
+### Process Group
+
+每一个 process 属于一个唯一的 process group。当新的子进程被创建的过程中，`pid` 会成为每一个进程独有的标识符，但是 `pgid` 会继承自父进程。
+
+`kill` 在命令行中和在系统调用中都可以用来向某一个特定的 process 发送一个 signal。
+
+```c
+void fork_12() {
+  int N = 10;
+  pid_t pid[N];
+  int i, child_status;
+
+  for (i = 0; i < N; i++)
+    if ((pid[i] = fork()) == 0) {
+      while (1) {
+      }
+    }
+  
+  // killing process by sending signals
+  for (i = 0; i < N; i++){
+    printf("Killing Process: %d\n", pid[i]);
+    kill(pid[i], SIGINT);
+  }
+
+  for (i = 0; i < N; i++) { /* Parent */
+    pid_t wpid = wait(&child_status);
+    if (WIFEXITED(child_status))
+      printf("Child %d terminated with exit status %d\r", wpid,
+             WEXITSTATUS(child_status));
+    else
+      printf("Child %d terminate abnormally\n", wpid);
+  }
+}
+```
+
+```text
+Killing Process: 71268
+Killing Process: 71269
+Killing Process: 71270
+Killing Process: 71271
+Killing Process: 71272
+Killing Process: 71273
+Killing Process: 71274
+Killing Process: 71275
+Killing Process: 71276
+Killing Process: 71277
+Child 71277 terminate abnormally
+Child 71276 terminate abnormally
+Child 71275 terminate abnormally
+Child 71272 terminate abnormally
+Child 71273 terminate abnormally
+Child 71271 terminate abnormally
+Child 71270 terminate abnormally
+Child 71268 terminate abnormally
+Child 71269 terminate abnormally
+Child 71274 terminate abnormally
+```
+
+### Receiving Signals
+
+Kernel computes: `pub = pending & ~blocked`: the set of pending and non-blocked signals for process p.
+
+如果计算得到的 bit-vector 不等于 0，内核会选择最小的非零位，并传递这个信号，并且产生对应的 actions。
+
+每一个 signal 都有不同的默认处理行为，但是我们也可以注册自定义的 signal handler!
+
+```c
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+void sigint_handler(int sig) {
+  printf("Custom defined signal handler");
+  exit(0);
+}
+
+int main() {
+  if (signal(SIGINT, sigint_handler) == SIG_ERR) {
+    printf("Signal Error");
+  }
+
+  pause();
+  return 0;
+}
+```
+
+```text
+^CCustom defined signal handler
+```
+
+### Signals Handlers as Concurrent Flows
+
+

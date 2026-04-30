@@ -45,6 +45,10 @@ void test_casting_double_long_long(long long a) {
 void show_limit() {
   printf("The largest of int is %d\n", INT_MAX);
   printf("The smallest of int is %d\n", INT_MIN);
+  printf("The largest of long is %ld\n", LONG_MAX);
+  printf("The smallest of long is %ld\n", LONG_MIN);
+  printf("The largest of long long is %lld\n", LONG_LONG_MAX);
+  printf("The smallest of long long is %lld\n", LONG_LONG_MIN);
   printf("=== float 类型 ===\n");
   printf("最大的浮点数: %.10f\n", FLT_MAX);
   printf("最小的浮点数: %.10f\n", -FLT_MAX);
@@ -65,7 +69,7 @@ int main() {
   //   quiz(200, -300);
   //   quiz(2000000000, 2000000000);
 
-  // show_limit();
+  show_limit();
 
   test_casting_float(INT_MAX);
   test_casting_float(INT_MAX - 1);
